@@ -1130,7 +1130,7 @@ class Editor:
 	
 	def updateFont(self):
 		self.textarea["font"] = (config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight"));
-		self.linenumbers.updateFont(self.textarea["font"]);
+		self.linenumbers.updateFont(self.textarea);
 		self.updateTheme();
 		self.updateTabWidth();
 	
