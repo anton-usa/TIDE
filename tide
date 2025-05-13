@@ -1,0 +1,4 @@
+#! /bin/bash
+
+directory=$(dirname $0);
+python "$directory/__main__.py" $*;
