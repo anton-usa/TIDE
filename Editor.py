@@ -272,8 +272,9 @@ class LineNumbers:
 		for i in range(firstVisLine, lastVisLine+1):
 			textareaConnect.xview_moveto(0);
 			bbox = textareaConnect.bbox(f"{i}.0");
-			textareaConnect.xview_moveto(xviewNow[0]);
-			self.gutter.create_text(self.gutter.winfo_width()-self._padx, bbox[1], text=str(i), tags=("number"));
+			if bbox is not None:
+				textareaConnect.xview_moveto(xviewNow[0]);
+				self.gutter.create_text(self.gutter.winfo_width()-self._padx, bbox[1], text=str(i), tags=("number"));
 	
 		self.updateNumberTag();
 		self.updateGutterWidth(textareaConnect);
