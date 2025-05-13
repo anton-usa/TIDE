@@ -32,18 +32,19 @@ class ConfigWindow:
 		body.rowconfigure(0, weight=1);
 		body.columnconfigure(0, weight=1);
 		
-		self.notebook = ttk.Notebook(body);
+		self.notebook = ttk.Notebook(body,width=600,height=650);
 		self.notebook.grid(row=0,column=0,sticky=(N, E, S, W));
+		self.notebook.grid_propagate(False);
 		
 		self.generalTab = self.general();
 		self.fontTab = self.font();
 		self.editorTab = self.editor();
 		self.systemTab = self.system();
 		
-		self.notebook.add(self.generalTab, text="General", padding=5);
-		self.notebook.add(self.fontTab, text="Font", padding=5);
-		self.notebook.add(self.editorTab, text="Editor Theme", padding=5);
-		self.notebook.add(self.systemTab, text="System Theme", padding=5);
+		self.notebook.add(self.generalTab, text="General");
+		self.notebook.add(self.fontTab, text="Font");
+		self.notebook.add(self.editorTab, text="Editor Theme");
+		self.notebook.add(self.systemTab, text="System Theme");
 		
 		footer = ttk.Frame(body, padding=(0, 10, 0, 0));
 		footer.grid(row=1,column=0);
@@ -65,7 +66,7 @@ class ConfigWindow:
 			config.set("editor", "numbers", numbersValue.get());
 			self.root.event_generate("<<ToggleLineNumbers>>");
 		
-		frame = ttk.Frame(self.notebook);
+		frame = ttk.Frame(self.notebook, padding=5);
 		frame.columnconfigure(0, weight=1);
 		
 		# Tab width
@@ -130,7 +131,7 @@ class ConfigWindow:
 			
 			return tuple(sorted(tuple(d)));
 		
-		frame = ttk.Frame(self.notebook);
+		frame = ttk.Frame(self.notebook, padding=5);
 		frame.rowconfigure(0, weight=1);
 		frame.columnconfigure(0, weight=1);
 		frame.columnconfigure(1, weight=1);
@@ -166,13 +167,25 @@ class ConfigWindow:
 		bold = ttk.Checkbutton(extras, text="Bold", variable=initBoldValue, offvalue="normal", onvalue="bold", command=setWeight);
 		bold.grid(row=0,column=2,sticky=E);
 		
-		resultFrame = ttk.Frame(frame, borderwidth=1, relief="raised", padding=10);
+		resultFrame = ttk.Frame(frame);
 		resultFrame.grid(row=0,column=1,sticky=(N, E, S, W));
+		resultFrame.rowconfigure(0, weight=1);
+		resultFrame.columnconfigure(0, weight=1);
 		
-		# The only time I will use .pack()
-		f = (config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight"));
-		view = Message(resultFrame, text="AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz\n0123456789\n~!@#$%^&*()`_+-=[]\\{}|;':\",./<>?", justify="left", font=f, aspect=100, width=200);
-		view.pack(expand=TRUE,fill=BOTH);
+		view = Text(resultFrame, font=(config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight")), relief="flat", wrap="none", width=10, height=1);
+		view.insert("1.0", "AaBbCcDdEeFfGgHhIiJj\nKkLlMmNnOoPpQqRrSsTt\nUuVvWwXxYyZz\n0123456789\n~!@#$%^&*()`_+-=[]\\\n{}|;':\",./<>?");
+		view["state"] = "disabled";
+
+		view.grid(row=0,column=0,sticky=(N, E, S, W));
+		
+		sy = ttk.Scrollbar(resultFrame, orient=VERTICAL, command=view.yview);
+		sy.grid(row=0,column=1,sticky=(N, S));
+		
+		sx = ttk.Scrollbar(resultFrame, orient=HORIZONTAL, command=view.xview);
+		sx.grid(row=1,column=0,sticky=(W, E));
+		
+		view["yscrollcommand"] = sy.set;
+		view["xscrollcommand"] = sx.set;
 		
 		return frame;
 	
@@ -414,8 +427,17 @@ class ConfigWindow:
 			else:
 				messagebox.showerror(title="Unable to remove", message="You're not allowed to remove your only theme", parent=self.window);
 		
-		frame = ttk.Frame(self.notebook);
+		def yview(*args):
+			editor.yview(*args);
+			lineNumbers.yview(*args);
+			
+		def sySet(*args):
+			sy.set(*args);
+			yview(MOVETO, args[0]);
+		
+		frame = ttk.Frame(self.notebook, padding=5);
 		frame.columnconfigure(0, weight=1);
+		frame.rowconfigure(2, weight=1);
 		
 		# THEME SELECTING
 		themesTuple = list(theme.get())[1:];
@@ -464,10 +486,11 @@ class ConfigWindow:
 		editorFrame = ttk.Frame(frame, padding=(0, 0, 0, 5));
 		editorFrame.grid(row=2, column=0, sticky=(N, E, S, W));
 		editorFrame.columnconfigure(1, weight=1);
+		editorFrame.rowconfigure(2, weight=1);
 		
 		# Tabs
 		tabsCanvas = Canvas(editorFrame, highlightthickness=0, borderwidth=0, relief="flat", height=30, width=301, cursor=__main__.CURSOR_POINTER);
-		tabsCanvas.grid(row=0,column=0,columnspan=2,sticky=(W, E));
+		tabsCanvas.grid(row=0,column=0,columnspan=3,sticky=(W, E));
 		
 		tabsCanvas.create_rectangle(0, 0, 10000, 30, tags=("tabbar"), width=0);
 		tabsCanvas.create_rectangle(0, 0, 150, 30, tags=("tabactive"), outline="#bbbbbb");
@@ -480,14 +503,14 @@ class ConfigWindow:
 		ttk.Separator(editorFrame, orient=HORIZONTAL).grid(row=1,column=0,columnspan=2,sticky=(W, E));
 		
 		# Line numbers
-		lineNumbers = Text(editorFrame, width=3, height=13, highlightthickness=0, borderwidth=0, font=(config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight")), padx=2, pady=2, cursor=__main__.CURSOR_POINTER, relief="flat");
+		lineNumbers = Text(editorFrame, width=3, highlightthickness=0, borderwidth=0, font=(config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight")), padx=2, pady=2, cursor=__main__.CURSOR_POINTER, relief="flat");
 		lineNumbers.insert("1.0", "\n".join(map(str, range(1, 14))), "numbers");
 		lineNumbers.tag_configure("numbers", justify="right");
 		lineNumbers.grid(row=2,column=0,sticky=(N, S));
 		lineNumbers["state"] = "disabled";
 		
 		# Editor
-		editor = Text(editorFrame, background="#ffffff", width=35, height=13, highlightthickness=0, borderwidth=0, foreground="#000000", font=(config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight")), padx=2, pady=2, wrap="word", cursor=__main__.CURSOR_POINTER, relief="flat");
+		editor = Text(editorFrame, background="#ffffff", highlightthickness=0, borderwidth=0, foreground="#000000", font=(config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight")), padx=2, pady=2, wrap="word", cursor=__main__.CURSOR_POINTER, relief="flat");
 		tab = " " * int(config.get("editor", "tab"));
 		editor.grid(row=2,column=1,sticky=(N, E, W, S));
 		
@@ -526,6 +549,11 @@ class ConfigWindow:
 		addEvents();
 		changeStyleFor("text");
 		
+		sy = ttk.Scrollbar(editorFrame, orient=VERTICAL, command=yview);
+		sy.grid(row=2,column=2,sticky=(N, S));
+		editor["yscrollcommand"] = sySet;
+		lineNumbers["yscrollcommand"] = sySet;
+		
 		# THEME BUTTONS
 		btnsFrame = ttk.Frame(frame);
 		btnsFrame.grid(row=3,column=0);
@@ -554,7 +582,7 @@ class ConfigWindow:
 			ttk.Style().theme_use(theme);
 			allCustomThemes = glob.glob(DIRECTORY+"/themes/*");
 			
-		frame = ttk.Frame(self.notebook);
+		frame = ttk.Frame(self.notebook, padding=5);
 		frame.columnconfigure(0, weight=1);
 		
 		allThemes = sorted(ttk.Style().theme_names());
