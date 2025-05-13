@@ -2,6 +2,7 @@ from tkinter import *;
 from tkinter import ttk;
 from tkinter import filedialog;
 from tkinter import messagebox;
+from tkinter.font import Font;
 from TextEditor import TextEditor;
 import idle.Percolator;
 import idle.ColorDelegator;
@@ -11,7 +12,6 @@ import sys;
 import theme;
 import os;
 import __main__;
-import threading;
 import re;
 from directory import HOME_PATH;
 
@@ -138,7 +138,7 @@ class Tab:
 	def _getTitle(self, text):
 		"""Adds the '...' if [text] is to long"""
 		textWidth = self.canvas.tk.call("font", "measure", "TkDefaultFont 9", "-displayof", self.canvas.master, text);
-		if textWidth > WIDTH-10 - BTN_WIDTH:
+		if textWidth > WIDTH-12 - BTN_WIDTH:
 			dotWidth = self.canvas.tk.call("font", "measure", "TkDefaultFont 9", "-displayof", self.canvas.master, ".");
 			extraWidth = textWidth - (WIDTH-10 - BTN_WIDTH);
 			lMid = int(len(text)/2 - (extraWidth/dotWidth)/2)-2;
@@ -235,126 +235,50 @@ class LineNumbers:
 	def __init__(self, root, parent):
 		self.root = root;
 		self.parent = parent;
-		self.previousLinesAmount = 0;
-		self.previousHash = "";
-		self.scrollPos = 0;
-		self._wantToUpdate = False;
-		self._runningLineUpdate = False;
-		self._textareaSize = (0, 0);
+		self._font = None;
+		self._padx = 5;
 
 		linenumbersStyles = theme.get(config.get("editor", "theme"), "linenumbers").split(" ");
-		self.textarea = Text(self.parent, padx=2, width=2, wrap="none", borderwidth=0, highlightthickness=0, takefocus=False, exportselection=False, pady=5, background=linenumbersStyles[0], foreground=linenumbersStyles[1]);
-		self.textarea.tag_config("number", justify=RIGHT);
-		
-		self.textarea["state"] = "disabled";
+		self.gutter = Canvas(self.parent, width=0, borderwidth=0, highlightthickness=0, background=linenumbersStyles[0]);
 	
-	def _remakeNumbers(self, end, textareaConnect):
-		self._runningLineUpdate = True;
-		numberList = [];
-		for number in range(1, end+1):
-			if self._wantToUpdate: break;
-			numberList.append(str(number) + "\n"*self._lineHeight(number, textareaConnect));
-		
-		if self._wantToUpdate:
-			self._runningLineUpdate = False;
-			self._wantToUpdate = False;
-			t = threading.Thread(target=self._remakeNumbers, args=(end, textareaConnect));
-			t.start();
-		else:
-			text = "\n".join(numberList);
-			self.textarea["state"] = "normal";
-			self.textarea.delete("1.0", "end");
-			self.textarea.insert("1.0", text, "number");
-			self.textarea.delete("end - 1 char", "end");
-			self.previousLinesAmount = end;
-			self.textarea["state"] = "disabled";
-			self.textarea["width"] = max(len(str(end)), 2);
-			self.textarea.yview_moveto(self.scrollPos);
-			self._runningLineUpdate = False;
+	def updateNumberTag(self):
+		linenumbersStyles = theme.get(config.get("editor", "theme"), "linenumbers").split(" ");
+		self.gutter.itemconfigure("number", justify="right", anchor="ne", font=self._font, fill=linenumbersStyles[1]);
 	
-	def updateWrap(self, textareaConnect):
-		self.textarea["state"] = "normal";
-		self.textarea.delete("1.0", "end");
-		self.forceUpdate(textareaConnect);
-		self.textarea["state"] = "normal";
-		self.textarea.delete("1.0");
-		self.textarea["state"] = "disabled";
+	def updateGutterWidth(self, textareaConnect):
+		fontInfo = Font(font=self._font);
+		width = fontInfo.measure(" ");
+		lastLine = str(int(float(textareaConnect.index("end - 1 char"))));
+		self.gutter.configure(width=max(width*2, width*len(lastLine))+self._padx*2);
 	
-	def forceUpdate(self, textareaConnect, fromSizeUpdate=False):
-		self.previousHash = "";
-		self.previousLinesAmount = 0;
-		self.updateNumbers(textareaConnect, fromSizeUpdate);
-	
-	def updateOnResize(self, textareaConnect):
-		w, h = (textareaConnect.winfo_width(), textareaConnect.winfo_height());
-		pw, ph = self._textareaSize;
-		if w != pw and h != ph:
-			self._textareaSize = (w, h);
-			self.forceUpdate(textareaConnect, True);
-	
-	def updateNumbers(self, textareaConnect, fromSizeUpdate=False):
-		text = textareaConnect.get("1.0", "end");
-		if hash(text) == self.previousHash: return;
-		
-		self.previousHash = hash(text);
-		end = int(float(textareaConnect.index("end - 1 char")));
-
-		if end != self.previousLinesAmount:
-			if config.get("view", "wrap") == "true":
-				if self._runningLineUpdate:
-					self._wantToUpdate = True;
-				else:
-					t = threading.Thread(target=self._remakeNumbers, args=(end, textareaConnect));
-					t.start();
-			else:
-				if not fromSizeUpdate:
-					self.textarea["state"] = "normal";
-					if end > self.previousLinesAmount:
-						self.textarea.insert("end", "\n");
-						for number in range(self.previousLinesAmount+1, end+1):
-							self.textarea.insert("end", number, "number");
-							self.textarea.insert("end", "\n");
-					else:
-						self.textarea.delete(str(end+1)+".0", "end");
-				
-					self.textarea.delete("end - 1 char");
-					self.textarea["state"] = "disabled";
-
-				self.previousLinesAmount = end;
-				self.textarea["width"] = max(len(str(end)), 2);
-				self.textarea.yview_moveto(self.scrollPos);
-		else:
-			idx = int(float(textareaConnect.index("insert")));
-			self.textarea["state"] = "normal";
-			text = self.textarea.get("1.0", "end");
-			si = text.find(str(idx));
-			sis = str(si);
-			ei = text.find(str(idx+1), si+len(sis)) - 1;
-			ei = ei if ei > -1 else si+len(sis);
-			
-			startPos = "1.0 + "+sis+" char";
-			endPos = "1.0 + "+str(ei)+" char";
-			self.textarea.delete(startPos, endPos);
-			self.textarea.insert(startPos, str(idx) + "\n"*self._lineHeight(idx, textareaConnect), "number");
-			
-			self.textarea["state"] = "disabled";
-			self.textarea["width"] = max(len(str(end)), 2);
-			self.textarea.yview_moveto(self.scrollPos);
-		
-			
-	def updateFont(self, font):
-		self.textarea["font"] = font;
-	
-	def _lineHeight(self, line, textareaConnect):
-		line = str(line)+".0";
-		n = textareaConnect.tk.call((textareaConnect, "count", "-displaylines", line, line+" lineend"));
-		return n if isinstance(n, int) else 1;
+	def updateFont(self, textareaConnect):
+		self._font = textareaConnect["font"];
+		self.updateGutterWidth(textareaConnect);
+		self.updateNumberTag();
 	
 	def updateTheme(self, textareaConnect):
 		linenumbersStyles = theme.get(config.get("editor", "theme"), "linenumbers").split(" ");
-		self.textarea.configure(background=linenumbersStyles[0], foreground=linenumbersStyles[1]);
-		self.updateFont(textareaConnect["font"]);
-
+		self.gutter.configure(background=linenumbersStyles[0]);
+		self.updateFont(textareaConnect);
+		self.updateNumberTag();
+	
+	def updateNumbers(self, textareaConnect):
+		xviewNow = textareaConnect.xview();
+		firstVisLine = int(float(textareaConnect.index("@0,0")));
+		lastVisLine = int(float(textareaConnect.index(f"@0,{textareaConnect.winfo_height()}")));
+		
+		self.gutter.delete("number");
+		preBbox = None;
+		for i in range(firstVisLine, lastVisLine+1):
+			textareaConnect.xview_moveto(0);
+			bbox = textareaConnect.bbox(f"{i}.0");
+			textareaConnect.xview_moveto(xviewNow[0]);
+			self.gutter.create_text(self.gutter.winfo_width()-self._padx, bbox[1], text=str(i), tags=("number"));
+	
+		self.updateNumberTag();
+		self.updateGutterWidth(textareaConnect);
+		self.gutter.update_idletasks();
+	
 class Editor:
 	def __init__(self, root, parent):
 		self.root = root;
@@ -390,10 +314,6 @@ class Editor:
 
 	
 	def _createFrame(self):
-		def updateLineNumbers():
-			try: self.linenumbers.updateOnResize(self.textarea);
-			except: pass;
-		
 		body = ttk.Frame(self.parent);
 		body.rowconfigure(1, weight=1);
 		body.columnconfigure(0, weight=1);
@@ -407,9 +327,9 @@ class Editor:
 		editor.grid(row=1,column=0,sticky=(N, E, S, W));
 		
 		self.linenumbers = LineNumbers(self.root, editor);
-		self.linenumbers.textarea.grid(row=0,column=0,sticky=(N, S));
+		self.linenumbers.gutter.grid(row=0,column=0,sticky=(N, S));
 		if config.get("editor", "numbers") == "false":
-			self.linenumbers.textarea.grid_remove();
+			self.linenumbers.gutter.grid_remove();
 
 		self.modal = ttk.Frame(editor, padding=5);
 		self.modalMode = None;
@@ -461,7 +381,6 @@ class Editor:
 		self.root.bind("<<GoToLine>>", lambda e: self.goToLine(), True);
 		self.root.bind("<<Find>>", lambda e: self.find());
 		self.root.bind("<<Replace>>", lambda e: self.replace());
-		self.root.bind("<Configure>", lambda e: updateLineNumbers(), True);
 		self.root.bind("<1>", lambda e: self.removeModal(e.widget), True);
 		for i in range(10):
 			self.root.bind("<<OpenRecent"+str(i)+">>", lambda e, n=i: self.openRecent(n));
@@ -820,8 +739,8 @@ class Editor:
 	def _createTextarea(self, file):
 		def yscroll(*args):
 			self.scrollY.set(*args);
-			self.linenumbers.scrollPos = float(args[0]);
-			self.linenumbers.textarea.yview_moveto(float(args[0]));
+			self.linenumbers.updateNumbers(self.textarea);
+			
 		
 		self.textarea.destroy();
 		if len(file.textarea.peer_names()) == 0:
@@ -859,6 +778,7 @@ class Editor:
 		self.textarea.bind("<KeyPress>", lambda e: self.linenumbers.updateNumbers(self.textarea), True);
 		self.textarea.bind("<KeyRelease>", lambda e: self.linenumbers.updateNumbers(self.textarea), True);
 		self.textarea.bind("<KeyRelease>", lambda e: self.updateInsertPos(), True);
+		self.textarea.bind("<ButtonRelease>", lambda e: self.updateInsertPos(), True);
 		self.textarea.bind("<<Selection>>", lambda e: self.enableSelectionMenuItems(), True);
 		self.textarea.bind("<KeyRelease>", lambda e: self.disableSelectionMenuItems(), True);
 		self.textarea.bind("<ButtonRelease>", lambda e: self.disableSelectionMenuItems(), True);
@@ -927,17 +847,7 @@ class Editor:
 		self.updateTheme();
 		
 		self.textarea.update_idletasks();
-		self.linenumbers.previousHash = "";
-		self.linenumbers.previousLinesAmount = 0;
-		
-		if config.get("view", "wrap") == "false":
-			self.linenumbers.textarea["state"] = "normal";
-			self.linenumbers.textarea.delete("1.0", "end");
-			self.linenumbers.textarea.insert("1.0", "1", "number");
-			self.linenumbers.textarea["state"] = "disabled";
-			self.linenumbers.previousLinesAmount = 1;
-		else:
-			self.linenumbers.updateNumbers(self.textarea);	
+		self.linenumbers.updateNumbers(self.textarea);
 
 	def enableSelectionMenuItems(self):
 		enable = ("Cut", "Copy", "Delete", "Indent Region");
@@ -1036,7 +946,7 @@ class Editor:
 		if len(f) > 0:
 			self.activeFile.filename = f;
 			self.save();
-	
+
 	def save(self, file=None):
 		if file == None: file = self.activeFile;
 		
@@ -1117,6 +1027,7 @@ class Editor:
 			self.root.title("Untitled Python Script - TIDE v"+__main__.__version__);
 		
 		self._createTextarea(file);
+		self.textarea.see("insert");
 	
 	def updateLnCol(self):
 		l, c = self.textarea.index("insert").split(".");
@@ -1166,7 +1077,7 @@ class Editor:
 			self.textarea["wrap"] = "none";
 			self.scrollX.grid();
 		
-		self.linenumbers.updateWrap(self.textarea);
+		self.linenumbers.updateNumbers(self.textarea);
 		self.root.event_generate("<<UpdateWrapMenu>>");
 	
 	def close(self, num=None):
@@ -1205,9 +1116,6 @@ class Editor:
 			self.textarea.destroy();
 			self.scrollY.grid_remove();
 			self.scrollX.grid_remove();
-			self.linenumbers.textarea["state"] = "normal";
-			self.linenumbers.textarea.delete("1.0", "end");
-			self.linenumbers.textarea["state"] = "disabled";
 			disable = ("Undo", "Redo", "Select All", "Paste", "Go to Line", "Find", "Find in Files", "Replace", "Comment Code", "Uncomment Code", "Cut", "Copy", "Delete", "Indent Region", "Outdent Region", "Class Browser", "Path Browser", "Save", "Save As", "Close");
 			for item in disable:
 				self.root.event_generate("<<"+item+" Disable>>");
@@ -1216,14 +1124,13 @@ class Editor:
 	
 	def toggleLineNumbers(self):
 		if config.get("editor", "numbers") == "true":
-			self.linenumbers.textarea.grid();
+			self.linenumbers.gutter.grid();
 		else:
-			self.linenumbers.textarea.grid_remove();
+			self.linenumbers.gutter.grid_remove();
 	
 	def updateFont(self):
 		self.textarea["font"] = (config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight"));
 		self.linenumbers.updateFont(self.textarea["font"]);
-		self.linenumbers.textarea["pady"] = self.textarea["pady"];
 		self.updateTheme();
 		self.updateTabWidth();
 	
