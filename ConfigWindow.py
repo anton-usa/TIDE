@@ -107,12 +107,13 @@ class ConfigWindow:
 	
 	def font(self):
 		def updateFont():
-			view["font"] = (self._fontsList[int(self._families.curselection()[0])], initSizeValue.get(), initBoldValue.get());
+			ff = self._fontsList[int(self._families.curselection()[0])] if len(self._families.curselection()) > 0 else config.get("editor", "font");
+			view["font"] = (ff, initSizeValue.get(), initBoldValue.get());
 			self.root.event_generate("<<UpdateFont>>");
 			
 		def setFont():
 			if len(self._families.curselection()) > 0:
-				f = self._fontsList[int(self._families.curselection()[0])];
+				f = self._fontsList[int(self._families.curselection()[0])];				
 				config.set("editor", "font", f);
 				updateFont();
 		
@@ -172,8 +173,32 @@ class ConfigWindow:
 		resultFrame.rowconfigure(0, weight=1);
 		resultFrame.columnconfigure(0, weight=1);
 		
-		view = Text(resultFrame, font=(config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight")), relief="flat", wrap="none", width=10, height=1);
-		view.insert("1.0", "AaBbCcDdEeFfGgHhIiJj\nKkLlMmNnOoPpQqRrSsTt\nUuVvWwXxYyZz\n0123456789\n~!@#$%^&*()`_+-=[]\\\n{}|;':\",./<>?");
+		view = Text(resultFrame, font=(config.get("editor", "font"), config.get("editor", "size"), config.get("editor", "weight")), relief="flat", wrap="none", width=15, height=1);
+		view.insert("1.0", """
+<ASCII/Latin1>
+AaBbCcDdEeFfGgHhIiJj
+1234567890#:+=(){}[]
+¢£¥§©«®¶½ĞÀÁÂÃÄÅÇÐØß
+
+<IPA,Greek,Cyrillic>
+ɐɕɘɞɟɤɫɮɰɷɻʁʃʆʎʞʢʫʭʯ
+ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκ
+БбДдЖжПпФфЧчЪъЭэѠѤѬӜ
+
+<Hebrew, Arabic>
+אבגדהוזחטיךכלםמןנסעף
+ابجدهوزحطي٠١٢٣٤٥٦٧٨٩
+
+<Devanagari, Tamil>
+०१२३४५६७८९अआइईउऊएऐओऔ
+௦௧௨௩௪௫௬௭௮௯அஇஉஎ
+
+<East Asian>
+〇一二三四五六七八九
+汉字漢字人木火土金水
+가냐더려모뵤수유즈치
+あいうえおアイウエオ
+""".strip());
 		view["state"] = "disabled";
 
 		view.grid(row=0,column=0,sticky=(N, E, S, W));

@@ -386,7 +386,7 @@ class MenuBar:
 		ttk.Label(infoFrame, text="Version "+__main__.__version__, font="TkDefaultFont").grid(row=2,column=1,sticky=W);
 		ttk.Label(infoFrame, text="Using Python v"+pyversion+" (with Tk v"+str(TkVersion)+")", font="TkDefaultFont").grid(row=3,column=1,sticky=W);
 		
-		link = "http://gitlab.com/ashapo4/tide";
+		link = "http://github.com/anton-usa/TIDE";
 		linkLabel = ttk.Label(infoFrame, text=link, foreground="#00aaff", font="TkDefaultFont 10 underline", cursor=__main__.CURSOR_POINTER);
 		linkLabel.grid(row=4,column=1,sticky=W,pady=10);
 		linkLabel.bind("<1>", lambda e: webbrowser.open(link));

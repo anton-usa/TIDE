@@ -1117,6 +1117,7 @@ class Editor:
 			self.textarea.destroy();
 			self.scrollY.grid_remove();
 			self.scrollX.grid_remove();
+			self.linenumbers.delete("number");
 			disable = ("Undo", "Redo", "Select All", "Paste", "Go to Line", "Find", "Find in Files", "Replace", "Comment Code", "Uncomment Code", "Cut", "Copy", "Delete", "Indent Region", "Outdent Region", "Class Browser", "Path Browser", "Save", "Save As", "Close");
 			for item in disable:
 				self.root.event_generate("<<"+item+" Disable>>");

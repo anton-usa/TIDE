@@ -7,7 +7,7 @@ import os;
 import sys;
 from directory import HOME_PATH;
 
-__version__ = "0.2";
+__version__ = "0.2.1";
 CURSOR_POINTER = "pointinghand" if sys.platform == "darwin" else "hand2";
 
 def main():
