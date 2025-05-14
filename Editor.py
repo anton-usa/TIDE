@@ -792,7 +792,7 @@ class Editor:
 		self.textarea.bind("<Tab>", lambda e: self.runEvent("<<IndentText>>"), True);
 		self.textarea.bind("<Shift-Key-Tab>", lambda e: self.runEvent("<<OutdentText>>"), True);
 		self.textarea.bind("<Control-Key-3>", lambda e: self.runEvent("<<CommentText>>"), True);
-		self.textarea.bind("<Shift-Control-Key-#>", lambda e: self.runEvent("<<UncommentText>>"), True);
+		self.textarea.bind("<Shift-Control-numbersign>", lambda e: self.runEvent("<<UncommentText>>"), True);
 		self.textarea.bind("<Control-BackSpace>", lambda e: self.textarea.delete("insert - 1 char wordstart", "insert"), True);
 		self.textarea.bind("<Control-Delete>", lambda e: self.textarea.delete("insert", "insert wordend"), True);
 		self.textarea.bind("<Control-Left>", lambda e: self.textarea.mark_set("insert", "insert - 1 char wordstart"), True);
