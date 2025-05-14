@@ -41,8 +41,14 @@ class Window:
 		width = config.get("window", "width");
 		height = config.get("window", "height");
 		self.root.geometry(width+"x"+height+"+0+0");
-		try: self.root.iconbitmap(default=DIRECTORY+"/icons/logo.ico");
-		except: pass;
+		try:
+			if sys.platform == "win32":
+				self.root.iconbitmap(default=f"{DIRECTORY}/icons/logo.ico");
+			else:
+				logo = PhotoImage(file=f"{DIRECTORY}/icons/logo.gif");
+				self.root.tk.call("wm", "iconphoto", self.root._w, logo);
+		except:
+			pass;
 		self.root.title("TIDE v"+__main__.__version__);
 		self.root.rowconfigure(0, weight=1);
 		self.root.columnconfigure(0, weight=1);

@@ -790,7 +790,7 @@ class Editor:
 		self.textarea.bind("<Control-c>", lambda e: self.runEvent("<<Copy>>"), True);
 		self.textarea.bind("<Control-v>", lambda e: self.runEvent("<<Paste>>"), True);
 		self.textarea.bind("<Tab>", lambda e: self.runEvent("<<IndentText>>"), True);
-		self.textarea.bind("<Shift-Key-Tab>", lambda e: self.runEvent("<<OutdentText>>"), True);
+		self.textarea.bind("<ISO_Left_Tab>", lambda e: self.runEvent("<<OutdentText>>"), True);					self.textarea.bind("<Shift-Key-Tab>", lambda e: self.runEvent("<<OutdentText>>"), True);
 		self.textarea.bind("<Control-Key-3>", lambda e: self.runEvent("<<CommentText>>"), True);
 		self.textarea.bind("<Shift-Control-numbersign>", lambda e: self.runEvent("<<UncommentText>>"), True);
 		self.textarea.bind("<Control-BackSpace>", lambda e: self.textarea.delete("insert - 1 char wordstart", "insert"), True);
@@ -1117,7 +1117,7 @@ class Editor:
 			self.textarea.destroy();
 			self.scrollY.grid_remove();
 			self.scrollX.grid_remove();
-			self.linenumbers.delete("number");
+			self.linenumbers.gutter.delete("number");
 			disable = ("Undo", "Redo", "Select All", "Paste", "Go to Line", "Find", "Find in Files", "Replace", "Comment Code", "Uncomment Code", "Cut", "Copy", "Delete", "Indent Region", "Outdent Region", "Class Browser", "Path Browser", "Save", "Save As", "Close");
 			for item in disable:
 				self.root.event_generate("<<"+item+" Disable>>");
