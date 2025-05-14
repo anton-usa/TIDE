@@ -1,4 +1,4 @@
 #! /bin/bash
 
 directory=$(dirname $0);
-python "$directory/__main__.py" $*;
+python3 "$directory/__main__.py" $*;
