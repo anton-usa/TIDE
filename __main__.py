@@ -7,7 +7,7 @@ import os;
 import sys;
 from directory import HOME_PATH;
 
-__version__ = "0.2.1";
+__version__ = "0.1";
 CURSOR_POINTER = "pointinghand" if sys.platform == "darwin" else "hand2";
 
 def main():
@@ -36,6 +36,5 @@ def restart(root):
 
 # run the program
 if __name__ == "__main__":
-	main();
-#	try: main();
-#	except: pass;
+	try: main();
+	except: pass;
