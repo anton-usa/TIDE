@@ -149,20 +149,20 @@ If you've discovered this `README.md`, but haven't yet discovered how to open th
 	Will open the tutorial found in the python
 	documentation website for your specific
 	python version found at:
-	http://docs.python.org/{version}/tutorial
+	`http://docs.python.org/[version]/tutorial`
 
 * Python Docs (F2)
 	Will open the documentation website for your
 	specific python version found at:
-	http://docs.python.org/{version}
+	`http://docs.python.org/[version]`
 
 * Tkinter Tutorial
 	Will open a tutorial for learning tkinter
-	the website is (tkdocs.com)[http://tkdocs.com/tutorial/index.html]
+	the website is [tkdocs.com](http://tkdocs.com/tutorial/index.html)
 
 * Tkinter Docs
 	Will open an API refrence from the website
-	(tkdocs.com)[http://tkdocs.com/pyref/index.html]
+	[tkdocs.com](http://tkdocs.com/pyref/index.html)
 
 ## Configuration
 Under the view menu, is a configuration opeion.

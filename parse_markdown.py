@@ -142,19 +142,19 @@ def parse(markdown, spaceTab="    "):
 					# parse quote
 					i, text = parseInlineText(i, "`", line);
 					result.append(["code", text]);
-				elif curChar == "[" and line.find("]", i+1) > -1 and not quotesOpen:
-					result.append(["text", textSoFar]);
-					textSoFar = "";
-					
-					# parse link
-					i, text = parseInlineText(i, "]", line);
-					result.append(["link", text]);
 				elif curChar == "(" and line.find(")", i+1) > -1 and line[i-1] != "\\" and not quotesOpen:
 					result.append(["text", textSoFar]);
 					textSoFar = "";
 					
-					# parse link text
+					# parse link
 					i, text = parseInlineText(i, ")", line);
+					result.append(["link", text]);
+				elif curChar == "[" and line.find("]", i+1) > -1 and line[i-1] != "\\" and not quotesOpen:
+					result.append(["text", textSoFar]);
+					textSoFar = "";
+					
+					# parse link text
+					i, text = parseInlineText(i, "]", line);
 					result.append(["link-text", text]);
 				else:
 					textSoFar += curChar if curChar != "\\" or (line[i-1] == "\\" and curChar == "\\") else "";
