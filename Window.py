@@ -13,7 +13,6 @@ from tkinter import ttk;
 from MenuBar import *;
 from Debugger import *;
 from Editor import *;
-from Shell import *;
 from Panel import *;
 import config;
 import sys;
