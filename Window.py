@@ -14,6 +14,7 @@ from MenuBar import *;
 from Debugger import *;
 from Editor import *;
 from Shell import *;
+from Panel import *;
 import config;
 import sys;
 from directory import DIRECTORY;
@@ -69,14 +70,21 @@ class Window:
 		self.root["menu"] = self.menu.menubar;
 		
 		# add the main components into paned windows
-		self.body = ttk.Frame(self.root, padding=0);
+		self.body = ttk.PanedWindow(self.root, orient=HORIZONTAL);
 		self.body.rowconfigure(0, weight=1);
 		self.body.columnconfigure(0, weight=1);
 		self.body.grid(row=0,column=0,sticky=(N, E, S, W));
 		
+		# side pane
+		self.sidepanel = Panel(self.root, self.body);
+		
+		
+		# bottom pane
+#		self.bottompanel = Panel(self.root, self.body);
+		
 		# the editor
 		self.editor = Editor(self.root, self.body);
-		self.editor.frame.grid(row=0,column=0,sticky=(N, E, S, W));
+		self.body.add(self.editor.frame);
 		
 		# focus on the editor upon start up
 		self.editor.textarea.mark_set("insert", "1.0");
@@ -84,8 +92,12 @@ class Window:
 		# some global event bindings
 		self.root.event_add("<<Quit>>", "<Control-q>");
 		self.root.event_add("<<Full>>", "<KeyPress-F11>");
+		self.root.event_add("<<Side>>", "<KeyPress-F10>");
+#		self.root.event_add("<<Bottom>>", "<KeyPress-F9>");
 		self.root.bind("<<Quit>>", self.quit);
 		self.root.bind("<<Full>>", self.toggleFull);
+		self.root.bind("<<Side>>", self.toggleSide);
+#		self.root.bind("<<Bottom>>", self.toggleBottom);
 		self.root.bind("<Configure>", lambda e: self.windowConfig(), True);
 		self.root.bind("<<UpdateWrapMenu>>", lambda e: self.updateWrapMenu());
 		
@@ -93,14 +105,37 @@ class Window:
 		if config.get("view", "fullscreen") == "true":
 			self.root.attributes("-fullscreen", 1);
 		
+		if config.get("view", "side") == "true":
+			self.body.insert(0, self.sidepanel.frame);
+		
 	def toggleFull(self, e=None):
 		"""Make the program fullscreen and unfullscreen"""
-		isFull = True if config.get("view", "fullscreen") == "true" else False;
+		isFull = config.get("view", "fullscreen") == "true";
 		self.root.attributes("-fullscreen", int(not isFull));
 		
 		fullscreen = str(not isFull).lower();
 		config.set("view", "fullscreen", fullscreen);
 		self.menu.displayFull.set(fullscreen);
+	
+#	def toggleBottom(self, e=None):
+#		"""Make the bottom panel show/unshow"""
+#		isShowing = config.get("view", "bottom") == "true";
+#		
+#		show = str(not isShowing).lower();
+#		config.set("view", "bottom", show);
+#		self.menu.showBottomPanel.set(show);
+	
+	def toggleSide(self, e=None):
+		"""Make the side panel show/unshow"""
+		isShowing = config.get("view", "side") == "true";
+		if isShowing:
+			self.body.forget(self.sidepanel.frame);
+		else:
+			self.body.insert(0, self.sidepanel.frame);
+		
+		show = str(not isShowing).lower();
+		config.set("view", "side", show);
+		self.menu.showSidePanel.set(show);
 	
 	def updateWrapMenu(self):
 		self.menu.wrapWords.set(config.get("view", "wrap"));

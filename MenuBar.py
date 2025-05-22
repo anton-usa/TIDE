@@ -32,6 +32,8 @@ The menu contains these items:
 		Outdent Region (shift+tab)
 	View
 		Full Screen (f11)
+		Side Panel (f10)
+		Bottom Panel (f9)
 		--------------------
 		Text Wrapping (f8)
 		--------------------
@@ -241,6 +243,12 @@ class MenuBar:
 
 		# create the menu and add all the items
 		menu = Menu(self.menubar);
+		
+		self.showSidePanel.set(viewConfig[0]);
+		menu.add_checkbutton(label="Side Panel", command=lambda: self.root.event_generate("<<Side>>"), accelerator="F10", underline=0, onvalue="true", offvalue="false", variable=self.showSidePanel);
+		
+		self.showBottomPanel.set(viewConfig[1]);
+#		menu.add_checkbutton(label="Bottom Panel", command=lambda: self.root.event_generate("<<Bottom>>"), accelerator="F9", underline=0, onvalue="true", offvalue="false", variable=self.showBottomPanel);
 		
 		self.displayFull.set(viewConfig[2]);
 		menu.add_checkbutton(label="Full Screen", command=lambda: self.root.event_generate("<<Full>>"), accelerator="F11", underline=0, onvalue="true", offvalue="false", variable=self.displayFull);
