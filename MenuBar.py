@@ -535,7 +535,6 @@ class MenuBar:
 					# insert the chapter
 					id = tree.insert(ids[level], "end", text=heading, open=True, tag=len(putIn));
 					f = font.Font(self.root, name="TkDefaultFont", exists=True);
-					width = f.measure(heading);
 					putIn.append("\t"*level+heading);
 					ids = ids[:level+1];
 					if level < len(ids):
