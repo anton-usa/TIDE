@@ -83,7 +83,7 @@ class Window:
 		
 		# the editor
 		self.editor = Editor(self.root, self.body);
-		self.body.add(self.editor.frame);
+		self.body.add(self.editor.frame, weight=1);
 		
 		# focus on the editor upon start up
 		self.editor.textarea.mark_set("insert", "1.0");
@@ -105,7 +105,7 @@ class Window:
 			self.root.attributes("-fullscreen", 1);
 		
 		if config.get("view", "side") == "true":
-			self.body.insert(0, self.sidepanel.frame);
+			self.body.insert(0, self.sidepanel.frame, weight=1);
 		
 	def toggleFull(self, e=None):
 		"""Make the program fullscreen and unfullscreen"""
