@@ -11,6 +11,7 @@ path = os.path.expanduser("~");
 currentDir = os.path.dirname(__file__);
 folderImg = PhotoImage(file=f"{currentDir}/folder.gif");
 fileImg = PhotoImage(file=f"{currentDir}/file.gif");
+body = None;
 
 def putInItems(tree, section, path, keepGoing=True):
 	folders = [i for i in glob.glob(path+"/*") if os.path.isdir(i)];
@@ -227,6 +228,7 @@ def rightClickMenu(window, tree, event):
 		menu.post(x, y);
 	
 def start(window):
+	global body;
 	panel = window.sidepanel.notebook;
 	body = ttk.Frame(panel, padding=5);
 	body.columnconfigure(0, weight=1);
@@ -264,4 +266,5 @@ def main(window):
 	pass;
 
 def end(window):
-	pass;
+	global body;
+	window.sidepanel.notebook.forget(body);
