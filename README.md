@@ -225,8 +225,8 @@ The IDE does come with some default plugins, they are:
 
 * Bracket Match
 * Word Completion (Ctrl+Space)
-* Smart Tab
-* Highlight Line
+* File Browser
+* And more!
 
 You can read their `README.md` files to know how to use them
 
