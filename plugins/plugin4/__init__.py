@@ -231,7 +231,7 @@ def start(window):
 	body = ttk.Frame(panel, padding=5);
 	body.columnconfigure(0, weight=1);
 	body.rowconfigure(1, weight=1);
-	panel.add(body, text="File Manager");
+	panel.add(body, text="File Browser");
 	
 	refresh = ttk.Button(body, text="⟳ Refresh", command=lambda: showFolder(tree, path));
 	refresh.grid(row=0,column=0,columnspan=2,sticky=(W, E));

@@ -14,4 +14,3 @@ Creates a file browser in the side panel
 	   and select "Rename File/Folder"
 * Open files and folders
 	* Double click the folder/file you want to open
-	   and select "Open File/Folder"
