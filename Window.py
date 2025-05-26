@@ -11,7 +11,6 @@ Some event bindings are placed here mostly because its more logical to place, th
 from tkinter import *;
 from tkinter import ttk;
 from MenuBar import *;
-from Debugger import *;
 from Editor import *;
 from Panel import *;
 import config;
