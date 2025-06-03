@@ -6,7 +6,7 @@ TIDE \(Tkinter Integrated Development Environment) was inspired by IDLE, python'
 TIDE is still in active development and will be coming with more features soon. Currently, an integrated shell is currently in the works, with plans to eventually add a debugger as well.
 
 ## How To Run
-If you've discovered this `README.md`, but haven't yet discovered how to open the program, this is for you. All you need to do is run the file `tide` \(for Linux users) or `tide.bat` \(for Windows users)
+If you've discovered this `README.md`, but haven't yet discovered how to open the program, this is for you. First, install Python from [python.org](https://python.org/download), then run the file `tide` \(for Linux users) or `tide.bat` \(for Windows users)
 
 ## Menus
 
